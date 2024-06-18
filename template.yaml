@@ -410,7 +410,7 @@ Resources:
   testLogsDashboard:
     Type: 'AWS::CloudWatch::Dashboard'
     Properties:
-      DashboardName: !Sub 'test-Error-Monitoring-${Env}'
+      DashboardName: !Sub 'test-Error-Monitoring-${ENV}'
       DashboardBody: !Sub |
         {
           "widgets": [
