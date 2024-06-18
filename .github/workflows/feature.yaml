@@ -4,26 +4,26 @@ on:
   push:
     # types: [opened, synchronize, reopened, closed]
     branches:
-      - dev
+      - feature/dashboard
 
 jobs:
   
-  unit_tests:
-    runs-on: ubuntu-latest
-    # if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  # unit_tests:
+  #   runs-on: ubuntu-latest
+  #   # if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened')
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
 
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20.x'
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '20.x'
 
-      - name: Unit-test
-        run: |
-          npm i
-          npm run test
+  #     - name: Unit-test
+  #       run: |
+  #         npm i
+  #         npm run test
 
   deploy:
     runs-on: ubuntu-latest

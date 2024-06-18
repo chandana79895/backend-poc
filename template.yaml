@@ -415,19 +415,6 @@ Resources:
         {
           "widgets": [
             {
-              "height": 6,
-              "width": 6,
-              "y": 33,
-              "x": 0,
-              "type": "log",
-              "properties": {
-                  "query": "SOURCE '${GetCustomerFunctionLogGroup}' | SOURCE '${PropertyFunctionLogGroup}' | SOURCE '${TransactionsFunctionLogGroup}' | SOURCE '${UserProfileFunctionLogGroup}' | SOURCE '${LoginFunctionLogGroup}' | fields @timestamp, @message \r\n| filter @message like httpStatusCode '200'\r\n", 
-                  "region": "${AWS::Region}",
-                  "title": "LambdaSuccessLogs",
-                  "view": "table"
-              }    
-            },
-            {
               "type": "text",
               "y": 0,
               "x": 0,
@@ -465,7 +452,7 @@ Resources:
               "x": 0,
               "properties": {
                 "metrics": [
-                    [ "AWS/ApiGateway", "Latency", "ApiName", "test-store-portal-${Env}" ],
+                    [ "AWS/ApiGateway", "Latency", "ApiName", "test-poc" ],
                     [ ".", "IntegrationLatency", ".", "." ],
                     [ ".", "Count", ".", "." ],
                     [ ".", "5XXError", ".", "." ],
@@ -487,7 +474,7 @@ Resources:
               "x": 0,
               "properties": {
                 "metrics": [
-                    [ "AWS/ApiGateway", "4XXError", "ApiName", "test-store-portal-${Env}" ],
+                    [ "AWS/ApiGateway", "4XXError", "ApiName", "test-poc" ],
                     [ ".", "5XXError", ".", "." ]
                 ],
                 "period": 300,
@@ -544,10 +531,7 @@ Resources:
               "height": 6,
               "properties": {
                 "metrics": [
-                  [ "AWS/Lambda", "Invocations", "FunctionName", "${UserProfileFunction}" ], 
-                  [ "...", "${GetCustomerFunction}" ],
-                  [ "...", "${TransactionsFunction}" ],
-                  [ "...", "${PropertyFunction}"],
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${PropertyFunction}" ], 
                   [ "...", "${LoginFunction}" ]
                 ],
                 "view": "timeSeries",
@@ -564,10 +548,7 @@ Resources:
               "height": 6,
               "properties": {
                 "metrics": [
-                  [ "AWS/Lambda", "Errors", "FunctionName", "${UserProfileFunction}" ], 
-                  [ "...", "${GetCustomerFunction}" ],
-                  [ "...", "${TransactionsFunction}" ],
-                  [ "...", "${PropertyFunction}"],
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${PropertyFunction}" ], 
                   [ "...", "${LoginFunction}" ]
                 ],
                 "view": "timeSeries",
@@ -584,10 +565,7 @@ Resources:
               "height": 6,
               "properties": {
                 "metrics": [
-                  [ "AWS/Lambda", "Throttles", "FunctionName", "${UserProfileFunction}" ], 
-                  [ "...", "${GetCustomerFunction}" ],
-                  [ "...", "${TransactionsFunction}" ],
-                  [ "...", "${PropertyFunction}"],
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${PropertyFunction}" ], 
                   [ "...", "${LoginFunction}" ]
                 ],
                 "view": "timeSeries",
@@ -604,10 +582,7 @@ Resources:
               "height": 6,
               "properties": {
                 "metrics": [
-                  [ "AWS/Lambda", "Duration", "FunctionName", "${UserProfileFunction}" ], 
-                  [ "...", "${GetCustomerFunction}" ],
-                  [ "...", "${TransactionsFunction}" ],
-                  [ "...", "${PropertyFunction}"],
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${PropertyFunction}" ], 
                   [ "...", "${LoginFunction}" ]
                 ],
                 "view": "timeSeries",
