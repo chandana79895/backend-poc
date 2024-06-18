@@ -1,33 +1,33 @@
 name: Build and Deploy
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
+  push:
+    # types: [opened, synchronize, reopened, closed]
     branches:
-      - main
+      - dev
 
 jobs:
   
-  unit_test:
+  # unit_tests:
+  #   runs-on: ubuntu-latest
+  #   # if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened')
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '20.x'
+
+  #     - name: Unit-test
+  #       run: |
+  #         npm i
+  #         npm run test
+
+  deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20.x'
-
-      - name: Unit-test
-        run: |
-          npm i
-          npm run test
-
-  if_merged:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.ref == 'refs/heads/main')
+    # if: github.event_name == 'push' && (github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.ref == 'refs/heads/main')
     environment:
       name: main
     steps:
