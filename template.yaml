@@ -407,6 +407,218 @@ Resources:
         - Key: Environment
           Value: !If [IsDev, Development, !Ref ENV]
 
+  testLogsDashboard:
+    Type: 'AWS::CloudWatch::Dashboard'
+    Properties:
+      DashboardName: !Sub 'test-Error-Monitoring-${Env}'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "height": 6,
+              "width": 6,
+              "y": 33,
+              "x": 0,
+              "type": "log",
+              "properties": {
+                  "query": "SOURCE '${GetCustomerFunctionLogGroup}' | SOURCE '${PropertyFunctionLogGroup}' | SOURCE '${TransactionsFunctionLogGroup}' | SOURCE '${UserProfileFunctionLogGroup}' | SOURCE '${LoginFunctionLogGroup}' | fields @timestamp, @message \r\n| filter @message like httpStatusCode '200'\r\n", 
+                  "region": "${AWS::Region}",
+                  "title": "LambdaSuccessLogs",
+                  "view": "table"
+              }    
+            },
+            {
+              "type": "text",
+              "y": 0,
+              "x": 0,
+              "width": 24,
+              "height": 1,
+              "properties": {
+                  "markdown": "LAMBDA METRICS"
+              }
+            },
+            {
+              "type": "text",
+              "y": 20,
+              "x": 0,
+              "width": 24,
+              "height": 1,
+              "properties": {
+                  "markdown": "DYNAMODB METRICS"
+              }    
+            },
+            {
+              "type": "text",
+              "y": 13,
+              "x": 0,
+              "width": 24,
+              "height": 1,
+              "properties": {
+                  "markdown": "API METRICS"
+              }    
+            },
+            {
+              "type": "metric",
+              "width": 24,
+              "height": 6,
+              "y": 14,
+              "x": 0,
+              "properties": {
+                "metrics": [
+                    [ "AWS/ApiGateway", "Latency", "ApiName", "test-store-portal-${Env}" ],
+                    [ ".", "IntegrationLatency", ".", "." ],
+                    [ ".", "Count", ".", "." ],
+                    [ ".", "5XXError", ".", "." ],
+                    [ ".", "4XXError", ".", "." ]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "title": "Api-Gateway- Count, IntegrationLatency, Latency",
+                "sparkline": true,
+                "view": "timeSeries"
+              }  
+            },
+            {
+              "type": "metric",
+              "width": 24,
+              "height": 6,
+              "y": 14,
+              "x": 0,
+              "properties": {
+                "metrics": [
+                    [ "AWS/ApiGateway", "4XXError", "ApiName", "test-store-portal-${Env}" ],
+                    [ ".", "5XXError", ".", "." ]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "title": "Api-Gateway 4XXError, 5XXError Metrics",
+                "sparkline": true,
+                "view": "timeSeries"
+              }  
+            },
+            {
+              "type": "metric",
+              "height": 6,
+              "width": 12,
+              "y": 21,
+              "x": 0,
+              "properties": {
+                "metrics": [
+                    [ "AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "user-profile-${ENV}", { "region": "${AWS::Region}" } ],
+                    [ ".", "ConsumedWriteCapacityUnits", ".", ".", { "region": "${AWS::Region}" } ]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "title": "UserProfile-Read&Write Metrics",
+                "sparkline": true,
+                "view": "timeSeries"
+              }  
+            },
+            {
+              "type": "metric",
+              "height": 6,
+              "width": 12,
+              "y": 21,
+              "x": 12,
+              "properties": {
+                "metrics": [
+                    [ "AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "user-lockout-${ENV}", { "region": "${AWS::Region}" } ],
+                    [ ".", "ConsumedWriteCapacityUnits", ".", ".", { "region": "${AWS::Region}" } ]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "title": "User-Lockout-Read&Write Metrics",
+                "sparkline": true,
+                "view": "timeSeries"
+              }  
+            },
+            {
+              "type": "metric",
+              "y": 7,
+              "x": 0,
+              "width": 6,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${UserProfileFunction}" ], 
+                  [ "...", "${GetCustomerFunction}" ],
+                  [ "...", "${TransactionsFunction}" ],
+                  [ "...", "${PropertyFunction}"],
+                  [ "...", "${LoginFunction}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "LambdaInvocations"
+              }  
+            },
+            {
+              "type": "metric",
+              "y": 1,
+              "x": 6,
+              "width": 6,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/Lambda", "Errors", "FunctionName", "${UserProfileFunction}" ], 
+                  [ "...", "${GetCustomerFunction}" ],
+                  [ "...", "${TransactionsFunction}" ],
+                  [ "...", "${PropertyFunction}"],
+                  [ "...", "${LoginFunction}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "LambdaErrors"
+              }  
+            },
+            {
+              "type": "metric",
+              "y": 1,
+              "x": 12,
+              "width": 6,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/Lambda", "Throttles", "FunctionName", "${UserProfileFunction}" ], 
+                  [ "...", "${GetCustomerFunction}" ],
+                  [ "...", "${TransactionsFunction}" ],
+                  [ "...", "${PropertyFunction}"],
+                  [ "...", "${LoginFunction}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "LambdaThrottles"
+              }
+            },
+            {
+              "type": "metric",
+              "y": 1,
+              "x": 18,
+              "width": 6,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/Lambda", "Duration", "FunctionName", "${UserProfileFunction}" ], 
+                  [ "...", "${GetCustomerFunction}" ],
+                  [ "...", "${TransactionsFunction}" ],
+                  [ "...", "${PropertyFunction}"],
+                  [ "...", "${LoginFunction}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "LambdaDuration"
+              }  
+            }     
+          ]
+        }             
+
 Outputs:
   # VPCId:
   #   Description: VPC ID
