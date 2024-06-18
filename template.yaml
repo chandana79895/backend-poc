@@ -454,9 +454,7 @@ Resources:
                 "metrics": [
                     [ "AWS/ApiGateway", "Latency", "ApiName", "test-poc" ],
                     [ ".", "IntegrationLatency", ".", "." ],
-                    [ ".", "Count", ".", "." ],
-                    [ ".", "5XXError", ".", "." ],
-                    [ ".", "4XXError", ".", "." ]
+                    [ ".", "Count", ".", "." ]
                 ],
                 "period": 300,
                 "stat": "Sum",
