@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Stage Env Build and Deploy
 
 on:
   push:
