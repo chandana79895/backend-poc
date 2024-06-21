@@ -346,7 +346,7 @@ Resources:
   MyDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
-      RestApiId: !Ref MyApiGateway     
+      RestApiId: !Ref testApi     
 
   testApi:
     Type: AWS::Serverless::Api
