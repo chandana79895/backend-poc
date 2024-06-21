@@ -6,7 +6,7 @@ Description: 'sam-app3
 
   '
 Parameters:
-  Env:
+  ENV:
     Type: String
     AllowedValues:
     - local
@@ -14,366 +14,56 @@ Parameters:
     - test
     - prod
     - stage
-  StageName:
+    - main
+    - poc
+  STAGENAME:
     Type: String
-  VpcCIDR:
-    Type: String
-    Default: 10.180.0.0/16
-  PublicSubnet1CIDR:
-    Type: String
-    Default: 10.180.10.0/24
-  PublicSubnet2CIDR:
-    Type: String
-    Default: 10.180.11.0/24
-  PrivateSubnet1CIDR:
-    Type: String
-    Default: 10.180.20.0/24
-  PrivateSubnet2CIDR:
-    Type: String
-    Default: 10.180.21.0/24
-  PrivateSubnet3CIDR:
-    Type: String
-    Default: 10.180.22.0/24
 Conditions:
   IsProd:
     Fn::Equals:
-    - Ref: Env
+    - Ref: ENV
     - prod
   IsStage:
     Fn::Equals:
-    - Ref: Env
+    - Ref: ENV
     - stage
   IsDev:
     Fn::Equals:
-    - Ref: Env
+    - Ref: ENV
     - dev
+  IsMain:
+    Fn::Equals:
+    - Ref: ENV
+    - main
 Globals:
   Function:
     Timeout: 365
     MemorySize: 512
     Runtime: nodejs18.x
     Tracing: Active
-    VpcConfig:
-      SubnetIds:
-      - Ref: PrivateSubnet1
-      SecurityGroupIds:
-      - Ref: NoIngressSecurityGroup
     Architectures:
     - x86_64
     Layers:
     - Ref: SharedLayer
     Environment:
       Variables:
-        Env:
-          Ref: Env
+        ENV:
+          Ref: ENV
         DYNAMO_DB_LOCAL: http://dynamodb-local:8000
         REDIS_DB_LOCAL: redis://:eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81@redis-cache:6380
     Tags:
-      ProjectName: Fortress
+      ProjectName: test
       Environment:
         Fn::If:
         - IsDev
         - Development
-        - Ref: Env
+        - Ref: ENV
   Api:
     Cors:
       AllowMethods: '''*'''
       AllowHeaders: '''*'''
       AllowOrigin: '''*'''
 Resources:
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock:
-        Ref: VpcCIDR
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env}
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env}
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      InternetGatewayId:
-        Ref: InternetGateway
-      VpcId:
-        Ref: VPC
-  PublicSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId:
-        Ref: VPC
-      AvailabilityZone:
-        Fn::Select:
-        - 0
-        - Fn::GetAZs: ''
-      CidrBlock:
-        Ref: PublicSubnet1CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env} Public Subnet (AZ1)
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  PublicSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId:
-        Ref: VPC
-      AvailabilityZone:
-        Fn::Select:
-        - 1
-        - Fn::GetAZs: ''
-      CidrBlock:
-        Ref: PublicSubnet2CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env} Public Subnet (AZ2)
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  PrivateSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId:
-        Ref: VPC
-      AvailabilityZone:
-        Fn::Select:
-        - 0
-        - Fn::GetAZs: ''
-      CidrBlock:
-        Ref: PrivateSubnet1CIDR
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env} Private Subnet (AZ1)
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  PrivateSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId:
-        Ref: VPC
-      AvailabilityZone:
-        Fn::Select:
-        - 1
-        - Fn::GetAZs: ''
-      CidrBlock:
-        Ref: PrivateSubnet2CIDR
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env} Private Subnet (AZ2)
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  PrivateSubnet3:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId:
-        Ref: VPC
-      AvailabilityZone:
-        Fn::Select:
-        - 2
-        - Fn::GetAZs: ''
-      CidrBlock:
-        Ref: PrivateSubnet3CIDR
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env} Private Subnet (AZ3)
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  FortressNatGatewayEIP:
-    Type: AWS::EC2::EIP
-    DependsOn: InternetGatewayAttachment
-    Properties:
-      Domain: vpc
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-ng-eip-${Env}
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  NatGateway:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId:
-        Fn::GetAtt:
-        - FortressNatGatewayEIP
-        - AllocationId
-      SubnetId:
-        Ref: PublicSubnet1
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-ng-${Env}
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:
-        Ref: VPC
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env} Public Routes
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  DefaultPublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn: InternetGatewayAttachment
-    Properties:
-      RouteTableId:
-        Ref: PublicRouteTable
-      DestinationCidrBlock: '0.0.0.0/0'
-      GatewayId:
-        Ref: InternetGateway
-  PublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId:
-        Ref: PublicRouteTable
-      SubnetId:
-        Ref: PublicSubnet1
-  PublicSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId:
-        Ref: PublicRouteTable
-      SubnetId:
-        Ref: PublicSubnet2
-  PrivateRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:
-        Ref: VPC
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: Fortress-platform-vpc-${Env} Private Routes (AZ1)
-      - Key: ProjectName
-        Value: Fortress
-      - Key: Environment
-        Value:
-          Fn::If:
-          - IsDev
-          - Development
-          - Ref: Env
-  DefaultPrivateRoute:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId:
-        Ref: PrivateRouteTable
-      DestinationCidrBlock: '0.0.0.0/0'
-      NatGatewayId:
-        Ref: NatGateway
-  PrivateSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId:
-        Ref: PrivateRouteTable
-      SubnetId:
-        Ref: PrivateSubnet1
-  PrivateSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId:
-        Ref: PrivateRouteTable
-      SubnetId:
-        Ref: PrivateSubnet2
-  PrivateSubnet3RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId:
-        Ref: PrivateRouteTable
-      SubnetId:
-        Ref: PrivateSubnet3
-  NoIngressSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName:
-        Fn::Sub: fortress-no-ingress-sg-${Env}
-      GroupDescription: Security group with no ingress rule
-      VpcId:
-        Ref: VPC
   LoginFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -386,20 +76,14 @@ Resources:
             Path: /login
             Method: post
             RestApiId:
-              Ref: FortressApi
+              Ref: testApi
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Fn::If:
-            - IsPreProd
-            - user-lockout-uat
-            - Fn::Sub: user-lockout-${Env}
+            Fn::Sub: user-lockout-${ENV}
       - DynamoDBReconfigurePolicy:
           TableName:
-            Fn::If:
-            - IsPreProd
-            - user-lockout-uat
-            - Fn::Sub: user-lockout-${Env}
+            Fn::Sub: user-lockout-${ENV}
     Metadata:
       SamResourceId: LoginFunction
   LoginFunctionLogGroup:
@@ -427,7 +111,7 @@ Resources:
             Path: /property
             Method: post
             RestApiId:
-              Ref: FortressApi
+              Ref: testApi
     Metadata:
       SamResourceId: PropertyFunction
   PropertyFunctionLogGroup:
@@ -443,11 +127,31 @@ Resources:
         - IsDev
         - 7
         - 365
-  FortressApi:
+  testApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Join:
+        - ''
+        - - /aws/apigateway/
+          - Fn::Sub: ${AWS::StackName}
+          - /test-custom-log-group
+      RetentionInDays:
+        Fn::If:
+        - IsDev
+        - 7
+        - 365
+  testApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName:
-        Ref: StageName
+        Fn::If:
+        - IsDev
+        - Dev
+        - Fn::If:
+          - IsStage
+          - Stage
+          - Fn::Sub: ${STAGENAME}
       CacheClusterEnabled: true
       CacheClusterSize: '0.5'
       MethodSettings:
@@ -474,7 +178,7 @@ Resources:
       AccessLogSetting:
         DestinationArn:
           Fn::GetAtt:
-          - FortressApiLogGroup
+          - testApiLogGroup
           - Arn
         Format: $context.requestId $context.identity.sourceIp $context.identity.caller
           $context.identity.user $context.httpMethod $context.resourcePath $context.status
@@ -487,20 +191,16 @@ Resources:
         Fn::If:
         - IsDev
         - SharedLayer
-        - Fn::Sub: SharedLayer-${Env}
+        - Fn::Sub: SharedLayer-${ENV}
       Description: Shared NPM package and Layer.
       ContentUri: ..\..\layer
       CompatibleRuntimes:
       - nodejs18.x
   LockoutInfoTable:
     Type: AWS::DynamoDB::Table
-    Condition: IsNotPreprod
     Properties:
       TableName:
-        Fn::If:
-        - IsPreProd
-        - user-lockout-uat
-        - Fn::Sub: user-lockout-${Env}
+        Fn::Sub: user-lockout-${ENV}
       AttributeDefinitions:
       - AttributeName: user_name
         AttributeType: S
@@ -523,34 +223,91 @@ Resources:
         PointInTimeRecoveryEnabled: true
       Tags:
       - Key: ProjectName
-        Value: Fortress
+        Value: test
       - Key: Environment
         Value:
           Fn::If:
           - IsDev
           - Development
-          - Ref: Env
+          - Ref: ENV
+  testLogsDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName:
+        Fn::Sub: test-Error-Monitoring-${ENV}
+      DashboardBody:
+        Fn::Sub: "{\n  \"widgets\": [\n    {\n      \"type\": \"text\",\n      \"\
+          y\": 0,\n      \"x\": 0,\n      \"width\": 24,\n      \"height\": 1,\n \
+          \     \"properties\": {\n          \"markdown\": \"LAMBDA METRICS\"\n  \
+          \    }\n    },\n    {\n      \"type\": \"text\",\n      \"y\": 20,\n   \
+          \   \"x\": 0,\n      \"width\": 24,\n      \"height\": 1,\n      \"properties\"\
+          : {\n          \"markdown\": \"DYNAMODB METRICS\"\n      }    \n    },\n\
+          \    {\n      \"type\": \"text\",\n      \"y\": 13,\n      \"x\": 0,\n \
+          \     \"width\": 24,\n      \"height\": 1,\n      \"properties\": {\n  \
+          \        \"markdown\": \"API METRICS\"\n      }    \n    },\n    {\n   \
+          \   \"type\": \"metric\",\n      \"width\": 24,\n      \"height\": 6,\n\
+          \      \"y\": 14,\n      \"x\": 0,\n      \"properties\": {\n        \"\
+          metrics\": [\n            [ \"AWS/ApiGateway\", \"Latency\", \"ApiName\"\
+          , \"test-poc\" ],\n            [ \".\", \"IntegrationLatency\", \".\", \"\
+          .\" ],\n            [ \".\", \"Count\", \".\", \".\" ]\n        ],\n   \
+          \     \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\":\
+          \ \"${AWS::Region}\",\n        \"title\": \"Api-Gateway- Count, IntegrationLatency,\
+          \ Latency\",\n        \"sparkline\": true,\n        \"view\": \"timeSeries\"\
+          \n      }  \n    },\n    {\n      \"type\": \"metric\",\n      \"width\"\
+          : 24,\n      \"height\": 6,\n      \"y\": 14,\n      \"x\": 0,\n      \"\
+          properties\": {\n        \"metrics\": [\n            [ \"AWS/ApiGateway\"\
+          , \"4XXError\", \"ApiName\", \"test-poc\" ],\n            [ \".\", \"5XXError\"\
+          , \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\"\
+          : \"Sum\",\n        \"region\": \"${AWS::Region}\",\n        \"title\":\
+          \ \"Api-Gateway 4XXError, 5XXError Metrics\",\n        \"sparkline\": true,\n\
+          \        \"view\": \"timeSeries\"\n      }  \n    },\n    {\n      \"type\"\
+          : \"metric\",\n      \"height\": 6,\n      \"width\": 12,\n      \"y\":\
+          \ 21,\n      \"x\": 0,\n      \"properties\": {\n        \"metrics\": [\n\
+          \            [ \"AWS/DynamoDB\", \"ConsumedReadCapacityUnits\", \"TableName\"\
+          , \"user-profile-${ENV}\", { \"region\": \"${AWS::Region}\" } ],\n     \
+          \       [ \".\", \"ConsumedWriteCapacityUnits\", \".\", \".\", { \"region\"\
+          : \"${AWS::Region}\" } ]\n        ],\n        \"period\": 300,\n       \
+          \ \"stat\": \"Sum\",\n        \"region\": \"${AWS::Region}\",\n        \"\
+          title\": \"UserProfile-Read&Write Metrics\",\n        \"sparkline\": true,\n\
+          \        \"view\": \"timeSeries\"\n      }  \n    },\n    {\n      \"type\"\
+          : \"metric\",\n      \"height\": 6,\n      \"width\": 12,\n      \"y\":\
+          \ 21,\n      \"x\": 12,\n      \"properties\": {\n        \"metrics\": [\n\
+          \            [ \"AWS/DynamoDB\", \"ConsumedReadCapacityUnits\", \"TableName\"\
+          , \"user-lockout-${ENV}\", { \"region\": \"${AWS::Region}\" } ],\n     \
+          \       [ \".\", \"ConsumedWriteCapacityUnits\", \".\", \".\", { \"region\"\
+          : \"${AWS::Region}\" } ]\n        ],\n        \"period\": 300,\n       \
+          \ \"stat\": \"Sum\",\n        \"region\": \"${AWS::Region}\",\n        \"\
+          title\": \"User-Lockout-Read&Write Metrics\",\n        \"sparkline\": true,\n\
+          \        \"view\": \"timeSeries\"\n      }  \n    },\n    {\n      \"type\"\
+          : \"metric\",\n      \"y\": 7,\n      \"x\": 0,\n      \"width\": 6,\n \
+          \     \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n\
+          \          [ \"AWS/Lambda\", \"Invocations\", \"FunctionName\", \"${PropertyFunction}\"\
+          \ ], \n          [ \"...\", \"${LoginFunction}\" ]\n        ],\n       \
+          \ \"view\": \"timeSeries\",\n        \"stacked\": false,\n        \"region\"\
+          : \"${AWS::Region}\",\n        \"title\": \"LambdaInvocations\"\n      }\
+          \  \n    },\n    {\n      \"type\": \"metric\",\n      \"y\": 1,\n     \
+          \ \"x\": 6,\n      \"width\": 6,\n      \"height\": 6,\n      \"properties\"\
+          : {\n        \"metrics\": [\n          [ \"AWS/Lambda\", \"Invocations\"\
+          , \"FunctionName\", \"${PropertyFunction}\" ], \n          [ \"...\", \"\
+          ${LoginFunction}\" ]\n        ],\n        \"view\": \"timeSeries\",\n  \
+          \      \"stacked\": false,\n        \"region\": \"${AWS::Region}\",\n  \
+          \      \"title\": \"LambdaErrors\"\n      }  \n    },\n    {\n      \"type\"\
+          : \"metric\",\n      \"y\": 1,\n      \"x\": 12,\n      \"width\": 6,\n\
+          \      \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n\
+          \          [ \"AWS/Lambda\", \"Invocations\", \"FunctionName\", \"${PropertyFunction}\"\
+          \ ], \n          [ \"...\", \"${LoginFunction}\" ]\n        ],\n       \
+          \ \"view\": \"timeSeries\",\n        \"stacked\": false,\n        \"region\"\
+          : \"${AWS::Region}\",\n        \"title\": \"LambdaThrottles\"\n      }\n\
+          \    },\n    {\n      \"type\": \"metric\",\n      \"y\": 1,\n      \"x\"\
+          : 18,\n      \"width\": 6,\n      \"height\": 6,\n      \"properties\":\
+          \ {\n        \"metrics\": [\n          [ \"AWS/Lambda\", \"Invocations\"\
+          , \"FunctionName\", \"${PropertyFunction}\" ], \n          [ \"...\", \"\
+          ${LoginFunction}\" ]\n        ],\n        \"view\": \"timeSeries\",\n  \
+          \      \"stacked\": false,\n        \"region\": \"${AWS::Region}\",\n  \
+          \      \"title\": \"LambdaDuration\"\n      }  \n    }     \n  ]\n}    \
+          \         \n"
 Outputs:
-  VPCId:
-    Description: VPC ID
-    Value:
-      Ref: PrivateSubnet1
-    Export:
-      Name:
-        Fn::Sub: ${AWS::StackName}-VPCId
-  MySecurityGroupExport:
-    Value:
-      Ref: NoIngressSecurityGroup
-    Export:
-      Name:
-        Fn::Sub: ${AWS::StackName}-MySecurityGroupExport
-  SharedLayerpExport:
-    Value:
-      Ref: SharedLayer
-    Export:
-      Name:
-        Fn::Sub: ${AWS::StackName}-SharedLayerExport
-  CapLoyaltyPlatformApi:
+  testApi:
     Description: API Gateway endpoint URL
     Value:
       Fn::Sub: https://${AWS::StackName}.execute-api.${AWS::Region}.amazonaws.com/
