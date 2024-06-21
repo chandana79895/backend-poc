@@ -91,7 +91,7 @@ jobs:
         run: |
           sam validate
           sam build
-          sam deploy --parameter-overrides $PARAMS 
+          sam deploy --config-env main --parameter-overrides $PARAMS 
 
   # notify_on_success:
   #   runs-on: ubuntu-latest
