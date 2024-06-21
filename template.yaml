@@ -346,13 +346,13 @@ Resources:
   testApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: !Ref STAGENAME
-        # - IsDev
-        # - Dev
-        # - !If
-        #   - IsStage
-        #   - Stage
-        #   - !Sub "${STAGENAME}"
+      StageName: !If
+        - IsDev
+        - Dev
+        - !If
+          - IsStage
+          - !Ref AWS::NoValue
+          - !Ref STAGENAME
       CacheClusterEnabled: true
       CacheClusterSize: '0.5'
       MethodSettings:
