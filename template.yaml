@@ -343,20 +343,10 @@ Resources:
       LogGroupName: !Join ['', ['/aws/apigateway/', !Sub '${AWS::StackName}', '/test-custom-log-group']]
       RetentionInDays: !If [IsDev, 7, 365] 
 
-  MyDeployment:
-    Type: AWS::ApiGateway::Deployment
-    Properties:
-      RestApiId: !Ref testApi     
-
   testApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName:
-        Fn::If:
-        - IsDev
-        - Dev
-        - Ref: STAGENAME
-      # DeploymentId: !Ref MyDeployment  
+      StageName: !If [IsDev, Dev, !Ref STAGENAME]
       CacheClusterEnabled: true
       CacheClusterSize: '0.5'
       MethodSettings:
