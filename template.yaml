@@ -356,6 +356,7 @@ Resources:
         - IsDev
         - Dev
         - Ref: STAGENAME
+      DeploymentId: !Ref MyDeployment  
       CacheClusterEnabled: true
       CacheClusterSize: '0.5'
       MethodSettings:
