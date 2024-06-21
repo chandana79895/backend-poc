@@ -341,7 +341,12 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Join ['', ['/aws/apigateway/', !Sub '${AWS::StackName}', '/test-custom-log-group']]
-      RetentionInDays: !If [IsDev, 7, 365]  
+      RetentionInDays: !If [IsDev, 7, 365] 
+
+  MyDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref MyApiGateway     
 
   testApi:
     Type: AWS::Serverless::Api
