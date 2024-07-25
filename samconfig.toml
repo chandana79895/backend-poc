@@ -15,7 +15,7 @@ disable_rollback = true
 [main.deploy]
 [main.deploy.parameters]
 stack_name = "test-poc"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-mq3eebwnc4qm"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-l7q4ej7kloza"
 s3_prefix = "test-main"
 region = "ap-southeast-1"
 confirm_changeset = true

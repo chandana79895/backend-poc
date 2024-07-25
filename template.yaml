@@ -342,6 +342,26 @@ Resources:
       LogGroupName: !Join ['', ['/aws/apigateway/', !Sub '${AWS::StackName}', '/test-custom-log-group']]
       RetentionInDays: !If [IsDev, 7, 365]  
 
+  ApiCWLRoleArn:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
+
+  # IAM Role for API GW + CWL
+  CloudWatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Action: 'sts:AssumeRole'
+          Effect: Allow
+          Principal:
+            Service: apigateway.amazonaws.com
+      Path: /
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'      
+
   testApi:
     Type: AWS::Serverless::Api
     Properties:
